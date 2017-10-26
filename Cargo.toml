@@ -1,0 +1,10 @@
+[package]
+name = "rust99"
+version = "0.1.0"
+authors = ["Jim Tracy <jamtrac@wharton.upenn.edu>"]
+
+[workspace]
+members = ["lists"]
+
+#[dependencies]
+#lists = { path = "lists" }
