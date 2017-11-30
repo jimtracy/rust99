@@ -17,7 +17,16 @@ pub mod lists {
     }
 
     pub fn reverse_list(ls: Vec<&str>) -> Vec<&str> {
-        vec!["placeholder"]
+        let mut newls = Vec::new();
+        let leng = ls.len();
+        for i in 0..leng {
+            newls.push(ls[(leng - 1) - i])
+        }
+        newls
+    }
+
+    pub fn is_palindrome(ls: Vec<&str>) -> bool {
+        ls == reverse_list(ls.to_vec())
     }
 
 
@@ -47,6 +56,19 @@ mod tests {
     #[test]
     fn test_num_elements() {
         assert_eq!(lists::num_elements(vec!["hi", "there", "foo"]), 3);
+    }
+
+    #[test]
+    fn test_reverse() {
+        assert_eq!(
+            lists::reverse_list(vec!["one", "two", "three"]),
+            vec!["three", "two", "one"]
+        )
+    }
+
+    #[test]
+    fn test_is_palindrome() {
+        assert!(lists::is_palindrome(vec!["one", "two", "two", "one"]));
     }
 
 }
