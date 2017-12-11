@@ -1,6 +1,0 @@
-[package]
-name = "lists"
-version = "0.1.0"
-authors = ["Jim Tracy <jamtrac@wharton.upenn.edu>"]
-
-[dependencies]

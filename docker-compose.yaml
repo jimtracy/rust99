@@ -1,0 +1,33 @@
+version: "3.4"
+
+volumes:
+  cargo_target:
+  cargo_home_registry:
+services:
+  db:
+    build:
+      context: ./db
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data:/var/lib/mysql
+    env_file:
+      - ./db/vars.env
+  api:
+    build:
+      context: ./api
+    volumes:
+      - ./api/rust99:/root/rust99
+      - cargo_target:/root/rust99/target
+      - cargo_home_registry:/usr/local/cargo/registry
+    env_file:
+      - ./api/vars.env
+    links:
+      - db
+    depends_on:
+      - db
+  dbadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8080:80
+       
