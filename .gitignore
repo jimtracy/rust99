@@ -1,6 +1,10 @@
 /api/rust99/target/
 **/*.rs.bk
-/api/rust99/target/
-**/*.rs.bk
-/api/rust99/target/
-**/*.rs.bk
+api/vars.env
+db/vars.env
+cargo_target/*
+!cargo_target/.gitkeep
+cargo_home_registry/*
+!cargo_home_registry/.gitkeep
+data/*
+!data/.gitkeep
