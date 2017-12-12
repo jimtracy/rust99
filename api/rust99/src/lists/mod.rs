@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 pub fn my_last<'a,T>(ls: &[&'a T]) -> &'a T {
     ls[ls.len() - 1]
 }
@@ -80,6 +82,93 @@ pub fn compress<'a,T: Eq>(ls: &[&'a T]) -> Vec<&'a T> {
     retval
 }
 
+pub fn pack<'a,T: Eq + Debug>(ls: &[&'a T]) -> Vec<Vec<&'a T>> {
+    let mut retval = Vec::new();
+    if ls.len()>0 {
+        let group: Vec<&'a T> = ls
+        .iter()
+        .filter_map(|&item| {
+            if (*item)==*(ls[0]) {
+                Some(item)
+            } else {
+                None
+            }
+        })
+        //.map(|item| *item)
+        .collect();
+        let newstart = group.len();
+        retval.push(group);
+        if newstart<ls.len() {
+            retval.extend(pack(&ls[newstart..]));
+        }
+    }
+    retval
+}
+
+pub fn rle<'a,T: Eq + Debug>(ls: &[&'a T]) -> Vec<(&'a T,usize)> {
+    let mut retval = Vec::new();
+    if ls.len()>0 {
+        let ((fst,co),_) = ls
+        .iter()
+        .fold(
+            ((ls[0],0),false),
+            |((elem,cou),sealed), &item| {
+            if !sealed && (*item)==*(elem) {
+                ((elem,cou+1),false)
+            } else {
+                ((elem,cou),true)
+            }
+        });
+        retval.push((fst,co));
+        if co<ls.len() {
+            retval.extend(rle(&ls[co..]));
+        }
+    }
+    retval
+}
+
+#[derive(Debug)]
+pub enum RLE<'a,T: 'a + Eq> {
+    Elem(&'a T),
+    Subls(&'a T,usize)
+}
+
+impl<'a,T: Eq> PartialEq for RLE<'a, T> {
+    fn eq(&self,other: &RLE<'a,T>) -> bool {
+        match *self {
+            RLE::Elem(thing) => {
+                match *other {
+                    RLE::Elem(thing2)=>thing==thing2,
+                    _ => false
+                }
+            },
+            RLE::Subls(el,num) => {
+                match *other {
+                    RLE::Subls(el2,num2) => el==el2 && num==num2,
+                    _ => false
+                }
+            }   
+        }
+    }
+}
+
+impl<'a,T: Eq> Eq for RLE<'a, T> {
+
+}
+
+pub fn rle2<'a,T: Eq + Debug>(ls: &[&'a T]) -> Vec<RLE<'a,T>> {
+    let first_pass = rle(ls);
+    first_pass.iter().map(|&(it,ct)| {
+        if ct==1 {
+            RLE::Elem(it)
+        } else {
+            RLE::Subls(it,ct)
+        }
+    }).collect()
+}
+
+
+
 
 #[test]
 fn test_my_last() {
@@ -147,5 +236,36 @@ fn test_flatten() {
 fn test_compress() {
     let one = &"one";
     let two = &"two";
+    
     assert_eq!(vec![one,two,one],compress(&[one, two, two, one]));
+}
+
+#[test]
+fn test_pack() {
+    let one = &"one";
+    let two = &"two";
+    let two2 = &"two";
+    let three = &"three";
+
+    assert_eq!(vec![vec![one],vec![two,two2],vec![three]],pack(&[one, two, two2, three]));
+}
+
+#[test]
+fn test_rle() {
+    let a = &"a";
+    let b = &"b";
+    let c = &"c";
+    let d = &"d";
+
+    assert_eq!(vec![(a,3),(b,2),(a,4),(c,3),(d,1)],rle(&[a,a,a,b,b,a,a,a,a,c,c,c,d]));
+}
+
+#[test]
+fn test_rle2() {
+    let a = &"a";
+    let b = &"b";
+    let c = &"c";
+    let d = &"d";
+
+    assert_eq!(vec![RLE::Subls(a,3),RLE::Subls(b,2),RLE::Subls(a,4),RLE::Subls(c,3),RLE::Elem(d)],rle2(&[a,a,a,b,b,a,a,a,a,c,c,c,d]));
 }
