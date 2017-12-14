@@ -269,3 +269,5 @@ fn test_rle2() {
 
     assert_eq!(vec![RLE::Subls(a,3),RLE::Subls(b,2),RLE::Subls(a,4),RLE::Subls(c,3),RLE::Elem(d)],rle2(&[a,a,a,b,b,a,a,a,a,c,c,c,d]));
 }
+
+
